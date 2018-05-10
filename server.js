@@ -5,19 +5,25 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/salas-ensayo');
+var db = mongoose.connect('mongodb://localhost:27017/salas-ensayo');
 
 /*
 Clases
  */
-//const Sala = require('./Sala');
+
+ /*
+ Esto va en un archivo separado
+  */
 var Schema = mongoose.Schema;
+
 var salaSchema = new Schema({
   name: String,
-  disponible: Boolean
+  disponible: { type: Boolean, default: true }
 });
-
 var Sala = mongoose.model('Sala', salaSchema);
+/*
+Hasta acá
+ */
 
 
 app.get('/', function(req, res) {
@@ -27,8 +33,8 @@ app.get('/', function(req, res) {
 // Pido estado de una sala
 app.get('/sala/:name', function(req, res) {
   Sala.findOne({name: req.params.name}).then(function(response) {
-    if (!response) return res.send('No la encontré');
-    res.send(JSON.stringify(response));
+    if (!response) return res.json({err: 'No la encontre'});
+    res.json(response);
   });
 });
 
@@ -36,14 +42,14 @@ app.get('/sala/:name', function(req, res) {
 app.post('/sala/:name', function (req, res) {
   const sala = new Sala({ name: req.params.name });
   sala.save().then(function () {
-    res.send('sala creada ' +  req.params.name);
+    res.json({msg: 'sala creada ' +  sala.name});
   });
 });
 
 app.post('/sala/:name/ocupar', function (req, res) {
   Sala.findOne({name: req.params.name}).then(function(sala) {
-    if (!sala) return res.send('No la encontré');
-    
+    if (!sala) return res.json({err: 'No la encontre'});
+
     sala.disponible = false;
     sala.save().then(function() {
       res.send("Sala " +  sala.name + " ocupada.");

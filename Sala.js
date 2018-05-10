@@ -6,6 +6,5 @@ var salaSchema = new Schema({
   disponible: Boolean
 });
 
-var Sala = mongoose.model('Sala', salaSchema);
 
-module.export = Sala;
+module.export = salaSchema;
